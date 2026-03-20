@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>叶叶小窝 · 可爱互动小游戏</title>
+  <style>
+    :root{
+      --bg1:#f7fbf5;
+      --bg2:#eaf6ea;
+      --card:#ffffffcc;
+      --green:#8ccf94;
+      --green-deep:#5faa6b;
+      --pink:#ffb7cc;
+      --yellow:#ffd96b;
+      --text:#375241;
+      --shadow:0 10px 30px rgba(82,125,92,.16);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--text);overflow:hidden;}
+    body{display:flex;justify-content:center;align-items:stretch;}
+    .app{
+      width:min(100vw, 500px);
+      height:100dvh;
+      padding:14px 14px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      position:relative;
+      overflow:hidden;
+    }
+    .topbar,.panel,.buttons,.mini{
+      background:var(--card);
+      backdrop-filter: blur(10px);
+      border:1px solid rgba(255,255,255,.55);
+      box-shadow:var(--shadow);
+      border-radius:24px;
+    }
+    .topbar{
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .title{display:flex;flex-direction:column;gap:4px;}
+    .title h1{margin:0;font-size:20px;line-height:1.1;}
+    .title p{margin:0;font-size:12px;opacity:.75;}
+    .coins{
+      min-width:86px;
+      text-align:center;
+      padding:10px 12px;
+      border-radius:18px;
+      background:#fff4cf;
+      font-weight:700;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.6);
+    }
+    .scene{
+      position:relative;
+      flex:1;
+      min-height:300px;
+      border-radius:28px;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 15% 20%, #ffffffcc 0 10%, transparent 11%),
+        radial-gradient(circle at 85% 18%, #ffffffaa 0 8%, transparent 9%),
+        linear-gradient(180deg, #f5fff8 0%, #dff7e5 65%, #c7eecf 100%);
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.7);
+    }
+    .scene.night{
+      background:
+        radial-gradient(circle at 18% 20%, #fff6b8 0 5%, transparent 6%),
+        radial-gradient(circle at 77% 12%, rgba(255,255,255,.95) 0 1.2%, transparent 1.8%),
+        radial-gradient(circle at 68% 19%, rgba(255,255,255,.8) 0 1%, transparent 1.7%),
+        radial-gradient(circle at 82% 26%, rgba(255,255,255,.8) 0 1%, transparent 1.7%),
+        linear-gradient(180deg, #1d2746 0%, #51638c 60%, #93a9b9 100%);
+    }
+    .hill{
+      position:absolute;left:-10%;right:-10%;bottom:-6%;height:30%;
+      border-radius:50% 50% 0 0;
+      background:linear-gradient(180deg,#84cd8f,#65b173);
+    }
+    .bubble{
+      position:absolute;top:18px;left:50%;transform:translateX(-50%);
+      background:#fff;
+      color:var(--text);
+      padding:12px 16px;
+      border-radius:18px;
+      font-size:14px;
+      max-width:78%;
+      text-align:center;
+      box-shadow:var(--shadow);
+      z-index:4;
+      line-height:1.35;
+    }
+    .bubble:after{
+      content:"";
+      position:absolute;left:50%;bottom:-8px;transform:translateX(-50%) rotate(45deg);
+      width:16px;height:16px;background:#fff;
+    }
+    .pet-wrap{
+      position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);
+      width:220px;height:230px;z-index:2;
+      display:flex;align-items:center;justify-content:center;
+      user-select:none;
+      touch-action:manipulation;
+    }
+    .pet{
+      position:relative;
+      width:165px;height:155px;
+      transform-origin:center bottom;
+      animation:bob 2.4s ease-in-out infinite;
+      cursor:pointer;
+    }
+    .body{
+      position:absolute;inset:26px 0 0 0;
+      background:linear-gradient(180deg,#baf0b3,#7ed48b);
+      border-radius:46% 46% 42% 42% / 54% 54% 38% 38%;
+      box-shadow:inset 0 -8px 0 rgba(255,255,255,.2), 0 10px 18px rgba(72,124,78,.18);
+    }
+    .ear{position:absolute;width:44px;height:56px;background:linear-gradient(180deg,#baf0b3,#83d88e);top:0;border-radius:60% 60% 35% 35%;}
+    .ear:after{content:"";position:absolute;inset:10px 11px 15px;background:#ffd9e6;border-radius:60% 60% 35% 35%;opacity:.75;}
+    .ear.left{left:18px;transform:rotate(-16deg);}
+    .ear.right{right:18px;transform:rotate(16deg);}
+    .face{position:absolute;left:22px;right:22px;top:50px;bottom:24px;}
+    .eye{position:absolute;top:26px;width:18px;height:22px;background:#243227;border-radius:50%;transition:all .18s ease;}
+    .eye.left{left:32px;}
+    .eye.right{right:32px;}
+    .eye:after{content:"";position:absolute;width:6px;height:6px;background:#fff;border-radius:50%;top:3px;left:4px;}
+    .blush{position:absolute;top:52px;width:20px;height:12px;background:#ffb5c9;border-radius:50%;opacity:.7;filter:blur(.5px);}
+    .blush.left{left:15px;}
+    .blush.right{right:15px;}
+    .mouth{position:absolute;left:50%;top:54px;transform:translateX(-50%);width:30px;height:18px;border-bottom:4px solid #314535;border-radius:0 0 16px 16px;}
+    .paw{position:absolute;bottom:4px;width:34px;height:28px;background:#99e2a2;border-radius:50%;box-shadow:inset 0 -4px 0 rgba(255,255,255,.22);}
+    .paw.left{left:25px;transform:rotate(-12deg);}
+    .paw.right{right:25px;transform:rotate(12deg);}
+    .leaf{position:absolute;left:50%;top:12px;transform:translateX(-50%) rotate(-8deg);width:38px;height:52px;background:linear-gradient(180deg,#66c96f,#4ca95e);border-radius:70% 0 70% 0;}
+    .leaf:after{content:"";position:absolute;left:18px;top:6px;bottom:6px;width:3px;background:#f1ffe7;border-radius:4px;transform:rotate(8deg);opacity:.75;}
+    .shadow{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);width:140px;height:26px;border-radius:50%;background:rgba(40,82,44,.12);filter:blur(6px);}
+    .pet.happy .mouth{height:14px;border-bottom-width:5px;}
+    .pet.sleep .eye{height:3px;border-radius:6px;top:34px;}
+    .pet.sleep .eye:after{display:none;}
+    .pet.excited{animation:bounce .35s ease 2;}
+    .pet.pat .body{transform:scale(1.03);}
+    .pet.pat .eye{height:17px;}
+    .pet.sad .mouth{border-bottom:none;border-top:4px solid #314535;top:64px;height:10px;border-radius:14px 14px 0 0;}
+    .panel{padding:14px 16px;}
+    .meter{display:flex;align-items:center;gap:10px;margin:10px 0;}
+    .meter label{width:58px;font-size:13px;font-weight:700;}
+    .bar{flex:1;height:12px;background:#e8f1e8;border-radius:999px;overflow:hidden;}
+    .fill{height:100%;border-radius:999px;transition:width .3s ease;}
+    .fill.happy{background:linear-gradient(90deg,#ffb8cb,#ff8fb0);}
+    .fill.full{background:linear-gradient(90deg,#ffd96b,#ffbc47);}
+    .fill.energy{background:linear-gradient(90deg,#a8e6b0,#73c77f);}
+    .status-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;gap:10px;flex-wrap:wrap;}
+    .buttons{
+      padding:12px;
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+    }
+    button{
+      appearance:none;border:none;border-radius:18px;padding:14px 10px;
+      font-size:15px;font-weight:700;color:var(--text);background:#fff;box-shadow:0 8px 16px rgba(73,105,81,.08);
+    }
+    button:active{transform:scale(.98);}
+    .mini{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+    .mini p{margin:0;font-size:13px;line-height:1.35;opacity:.85;}
+    .tiny{font-size:12px;padding:10px 12px;border-radius:14px;background:#eef8ef;}
+    .floating{
+      position:absolute;pointer-events:none;z-index:3;font-weight:800;animation:floatUp 1s ease forwards;
+      text-shadow:0 2px 8px rgba(255,255,255,.6);
+    }
+    .star{
+      position:absolute;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font-size:24px;background:#fff8d1;box-shadow:var(--shadow);cursor:pointer;user-select:none;
+      animation:fall linear forwards;
+    }
+    .overlay{
+      position:absolute;inset:0;background:rgba(255,255,255,.15);backdrop-filter:blur(2px);z-index:8;
+      display:none;
+    }
+    .overlay.show{display:block;}
+    .game-card{
+      position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+      width:min(92%,380px);background:#ffffffed;border-radius:24px;padding:18px 16px;box-shadow:var(--shadow);text-align:center;
+    }
+    .game-card h3{margin:0 0 8px;font-size:20px;}
+    .game-card p{margin:0 0 12px;font-size:14px;line-height:1.45;}
+    .pill{display:inline-block;padding:8px 12px;border-radius:999px;background:#eef8ef;font-size:13px;margin:4px;}
+    .game-ui{position:absolute;left:12px;right:12px;top:12px;display:none;justify-content:space-between;z-index:9;font-weight:800;}
+    .game-ui.show{display:flex;}
+    .badge{background:#ffffffd8;padding:8px 12px;border-radius:999px;box-shadow:var(--shadow);font-size:14px;}
+    .footer-note{font-size:11px;opacity:.6;text-align:center;margin-top:-4px;}
+    @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    @keyframes bounce{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+    @keyframes floatUp{0%{transform:translateY(0) scale(.9);opacity:0}20%{opacity:1}100%{transform:translateY(-50px) scale(1.1);opacity:0}}
+    @keyframes fall{from{transform:translateY(-10vh) rotate(0deg)}to{transform:translateY(105vh) rotate(220deg)}}
+    @media (max-height:740px){
+      .pet-wrap{top:53%;}
+      .panel{padding:12px 14px;}
+      .buttons button{padding:12px 8px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="title">
+        <h1>叶叶小窝</h1>
+        <p>摸摸它、喂喂它、陪它玩一会儿吧 ♡</p>
+      </div>
+      <div class="coins" id="coins">🍪 12</div>
+    </div>
+
+    <div class="scene" id="scene">
+      <div class="bubble" id="bubble">你来啦，我今天想被摸摸脑袋～</div>
+      <div class="overlay" id="overlay">
+        <div class="game-ui" id="gameUi">
+          <div class="badge" id="gameScore">⭐ 0</div>
+          <div class="badge" id="gameTime">⏳ 15</div>
+        </div>
+        <div class="game-card" id="gameCard">
+          <h3>星星接接乐</h3>
+          <p>在 15 秒内点掉掉下来的小星星。<br>每点到 1 颗，叶叶会开心一点，还能拿到小饼干。</p>
+          <div>
+            <span class="pill">⭐ 点星星</span>
+            <span class="pill">🍪 赢饼干</span>
+            <span class="pill">💗 加开心</span>
+          </div>
+          <button id="startGameBtn" style="margin-top:12px;width:100%;background:#eef8ef;">开始玩</button>
+        </div>
+      </div>
+      <div class="shadow"></div>
+      <div class="pet-wrap">
+        <div class="pet happy" id="pet" aria-label="叶叶">
+          <div class="ear left"></div>
+          <div class="ear right"></div>
+          <div class="body"></div>
+          <div class="leaf"></div>
+          <div class="face">
+            <div class="eye left"></div>
+            <div class="eye right"></div>
+            <div class="blush left"></div>
+            <div class="blush right"></div>
+            <div class="mouth"></div>
+          </div>
+          <div class="paw left"></div>
+          <div class="paw right"></div>
+        </div>
+      </div>
+      <div class="hill"></div>
+    </div>
+
+    <div class="panel">
+      <div class="status-row">
+        <strong>今天的叶叶状态</strong>
+        <span id="clockText">☀️ 白天模式</span>
+      </div>
+      <div class="meter"><label>开心</label><div class="bar"><div class="fill happy" id="happyBar" style="width:72%"></div></div><span id="happyText">72</span></div>
+      <div class="meter"><label>饱饱</label><div class="bar"><div class="fill full" id="fullBar" style="width:61%"></div></div><span id="fullText">61</span></div>
+      <div class="meter"><label>活力</label><div class="bar"><div class="fill energy" id="energyBar" style="width:66%"></div></div><span id="energyText">66</span></div>
+    </div>
+
+    <div class="buttons">
+      <button id="petBtn">🫳 摸摸脑袋</button>
+      <button id="feedBtn">🍪 喂小饼干</button>
+      <button id="playBtn">🎾 陪它玩球</button>
+      <button id="sleepBtn">🌙 哄它睡觉</button>
+      <button id="dressBtn">🎀 换个表情</button>
+      <button id="miniBtn">⭐ 星星接接乐</button>
+    </div>
+
+    <div class="mini">
+      <p id="tip">小提示：连着摸摸三次，会触发撒娇反应喔。</p>
+      <button class="tiny" id="resetBtn">重置小窝</button>
+    </div>
+    <div class="footer-note">进度会自动保存在手机浏览器里。</div>
+  </div>
+
+  <script>
+    const pet = document.getElementById('pet');
+    const bubble = document.getElementById('bubble');
+    const coinsEl = document.getElementById('coins');
+    const happyBar = document.getElementById('happyBar');
+    const fullBar = document.getElementById('fullBar');
+    const energyBar = document.getElementById('energyBar');
+    const happyText = document.getElementById('happyText');
+    const fullText = document.getElementById('fullText');
+    const energyText = document.getElementById('energyText');
+    const scene = document.getElementById('scene');
+    const tip = document.getElementById('tip');
+    const clockText = document.getElementById('clockText');
+    const overlay = document.getElementById('overlay');
+    const gameUi = document.getElementById('gameUi');
+    const gameCard = document.getElementById('gameCard');
+    const gameScore = document.getElementById('gameScore');
+    const gameTime = document.getElementById('gameTime');
+    const startGameBtn = document.getElementById('startGameBtn');
+
+    const state = loadState() || {
+      happy: 72,
+      full: 61,
+      energy: 66,
+      coins: 12,
+      mood: 'happy',
+      pats: 0,
+      dress: 0,
+      lastTick: Date.now()
+    };
+
+    const lines = {
+      greet:[
+        '你来啦，我今天想被摸摸脑袋～',
+        '我有一点点想你，所以一直在等你点开。',
+        '今天的小叶子状态还不错，适合一起玩。',
+        '抱一下也算摸摸，对吧？'
+      ],
+      pat:[
+        '唔，脑袋热乎乎的……再摸一下！',
+        '被摸摸以后，我会变得很乖。',
+        '好喜欢这种轻轻碰一下的感觉。',
+        '再来一次，我就要蹭你手心了。'
+      ],
+      feed:[
+        '啊呜！这个小饼干有幸福味道。',
+        '吃到了吃到了，叶叶今天不闹脾气。',
+        '嚼嚼嚼……还有碎屑掉在嘴边。',
+        '这个奖励非常合理，我接受。'
+      ],
+      play:[
+        '球球飞过来啦！我追！',
+        '玩了一会儿，心情一下亮起来了。',
+        '跑来跑去好开心，就是有点喘。',
+        '我赢了！虽然规则是我现编的。'
+      ],
+      sleep:[
+        '困啦……靠一下，就睡五分钟。',
+        '眼睛先眯一会儿，醒了再陪你。',
+        '晚安模式启动……呼噜。',
+        '抱着小被子睡，梦里也是软软的。'
+      ],
+      poor:[
+        '小饼干不够了……去玩小游戏赚一点吧。',
+        '库存告急！叶叶开始眼巴巴。'
+      ],
+      dress:[
+        '换了个表情，今天更会卖萌了。',
+        '新造型完成，我自己都觉得可爱。',
+        '好，今天走的是乖巧路线。'
+      ],
+      combo:[
+        '你连着摸我三次了……是不是偏心我？',
+        '今天的偏爱指标超标，我要贴过来。',
+        '被你这样哄，我会记很久的。'
+      ],
+      low:[
+        '我有点蔫了，想吃点东西或者睡一会儿。',
+        '状态不太满，陪陪我嘛。'
+      ]
+    };
+
+    let decayTimer = null;
+    let gameTimer = null;
+    let spawnTimer = null;
+    let score = 0;
+    let timeLeft = 15;
+
+    function clamp(n){ return Math.max(0, Math.min(100, Math.round(n))); }
+    function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+    function saveState(){
+      state.lastTick = Date.now();
+      localStorage.setItem('leafPetGameSave', JSON.stringify(state));
+    }
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem('leafPetGameSave');
+        if(!raw) return null;
+        const saved = JSON.parse(raw);
+        const now = Date.now();
+        const mins = Math.floor((now - (saved.lastTick || now))/60000);
+        if(mins > 0){
+          saved.happy = clamp(saved.happy - mins * 0.35);
+          saved.full = clamp(saved.full - mins * 0.5);
+          saved.energy = clamp(saved.energy - mins * 0.28);
+        }
+        return saved;
+      }catch(e){ return null; }
+    }
+
+    function updateTimeTheme(){
+      const hour = new Date().getHours();
+      const isNight = hour >= 19 || hour < 6;
+      scene.classList.toggle('night', isNight);
+      clockText.textContent = isNight ? '🌙 夜晚模式' : '☀️ 白天模式';
+    }
+
+    function updateMoodClass(){
+      pet.classList.remove('happy','sleep','sad');
+      if(state.energy < 28){
+        pet.classList.add('sleep');
+      } else if(state.happy < 28 || state.full < 22){
+        pet.classList.add('sad');
+      } else {
+        pet.classList.add('happy');
+      }
+    }
+
+    function render(){
+      state.happy = clamp(state.happy);
+      state.full = clamp(state.full);
+      state.energy = clamp(state.energy);
+      happyBar.style.width = state.happy + '%';
+      fullBar.style.width = state.full + '%';
+      energyBar.style.width = state.energy + '%';
+      happyText.textContent = state.happy;
+      fullText.textContent = state.full;
+      energyText.textContent = state.energy;
+      coinsEl.textContent = '🍪 ' + state.coins;
+      updateMoodClass();
+      saveState();
+    }
+
+    function say(text){
+      bubble.textContent = text;
+    }
+
+    function floatText(text, emoji='💗'){
+      const el = document.createElement('div');
+      el.className = 'floating';
+      el.textContent = emoji + ' ' + text;
+      const x = 25 + Math.random() * 50;
+      el.style.left = x + '%';
+      el.style.top = (54 + Math.random()*8) + '%';
+      el.style.fontSize = (16 + Math.random()*8) + 'px';
+      scene.appendChild(el);
+      setTimeout(()=>el.remove(), 1000);
+    }
+
+    function excite(){
+      pet.classList.remove('excited');
+      void pet.offsetWidth;
+      pet.classList.add('excited');
+      setTimeout(()=>pet.classList.remove('excited'), 700);
+    }
+
+    function actionPet(){
+      state.pats = (state.pats || 0) + 1;
+      state.happy += 8;
+      state.energy -= 2;
+      pet.classList.add('pat');
+      setTimeout(()=>pet.classList.remove('pat'), 260);
+      if(state.pats % 3 === 0){
+        say(rand(lines.combo));
+        floatText('+12', '💞');
+        state.happy += 4;
+      } else {
+        say(rand(lines.pat));
+        floatText('+8', '💗');
+      }
+      excite();
+      render();
+    }
+
+    function actionFeed(){
+      if(state.coins <= 0){
+        say(rand(lines.poor));
+        floatText('去赚饼干', '🥺');
+        return;
+      }
+      state.coins -= 1;
+      state.full += 16;
+      state.happy += 6;
+      state.energy += 2;
+      say(rand(lines.feed));
+      floatText('+16', '🍪');
+      excite();
+      render();
+    }
+
+    function actionPlay(){
+      state.happy += 12;
+      state.energy -= 10;
+      state.full -= 6;
+      say(rand(lines.play));
+      floatText('+12', '🎾');
+      excite();
+      render();
+    }
+
+    function actionSleep(){
+      state.energy += 20;
+      state.happy += 4;
+      say(rand(lines.sleep));
+      floatText('+20', '😴');
+      render();
+    }
+
+    function actionDress(){
+      state.dress = (state.dress || 0) + 1;
+      const mode = state.dress % 3;
+      const blushes = document.querySelectorAll('.blush');
+      const leaf = document.querySelector('.leaf');
+      if(mode === 0){
+        blushes.forEach(b=>b.style.opacity='0.7');
+        leaf.style.transform = 'translateX(-50%) rotate(-8deg)';
+        leaf.style.filter = 'none';
+      } else if(mode === 1){
+        blushes.forEach(b=>b.style.opacity='1');
+        leaf.style.transform = 'translateX(-50%) rotate(10deg)';
+        leaf.style.filter = 'drop-shadow(0 2px 4px rgba(255,255,255,.25))';
+      } else {
+        blushes.forEach(b=>b.style.opacity='0.35');
+        leaf.style.transform = 'translateX(-50%) rotate(-20deg)';
+        leaf.style.filter = 'saturate(1.25)';
+      }
+      state.happy += 5;
+      say(rand(lines.dress));
+      floatText('+5', '🎀');
+      render();
+    }
+
+    function passiveDecay(){
+      clearInterval(decayTimer);
+      decayTimer = setInterval(()=>{
+        state.happy -= 1;
+        state.full -= 1;
+        state.energy -= 1;
+        if(state.happy < 22 || state.full < 18 || state.energy < 20){
+          say(rand(lines.low));
+        }
+        render();
+      }, 25000);
+    }
+
+    function openMiniGame(){
+      overlay.classList.add('show');
+      gameCard.style.display = 'block';
+      gameUi.classList.remove('show');
+      clearMiniGameStars();
+    }
+
+    function startMiniGame(){
+      score = 0;
+      timeLeft = 15;
+      gameCard.style.display = 'none';
+      gameUi.classList.add('show');
+      gameScore.textContent = '⭐ ' + score;
+      gameTime.textContent = '⏳ ' + timeLeft;
+      spawnStar();
+      spawnTimer = setInterval(spawnStar, 600);
+      gameTimer = setInterval(()=>{
+        timeLeft -= 1;
+        gameTime.textContent = '⏳ ' + timeLeft;
+        if(timeLeft <= 0){
+          finishMiniGame();
+        }
+      }, 1000);
+    }
+
+    function spawnStar(){
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.textContent = Math.random() > 0.15 ? '⭐' : '🌟';
+      star.style.left = Math.random() * 82 + '%';
+      star.style.top = '-4%';
+      star.style.animationDuration = (2.7 + Math.random() * 1.4) + 's';
+      star.addEventListener('click', ()=>{
+        score += 1;
+        gameScore.textContent = '⭐ ' + score;
+        star.remove();
+      });
+      overlay.appendChild(star);
+      setTimeout(()=>star.remove(), 4500);
+    }
+
+    function clearMiniGameStars(){
+      overlay.querySelectorAll('.star').forEach(s=>s.remove());
+    }
+
+    function finishMiniGame(){
+      clearInterval(gameTimer);
+      clearInterval(spawnTimer);
+      clearMiniGameStars();
+      const rewardCoins = Math.max(2, Math.floor(score / 2));
+      const rewardHappy = Math.min(18, score + 4);
+      state.coins += rewardCoins;
+      state.happy += rewardHappy;
+      state.energy -= 4;
+      render();
+      gameUi.classList.remove('show');
+      gameCard.style.display = 'block';
+      gameCard.innerHTML = `
+        <h3>小游戏结束啦</h3>
+        <p>你一共接到了 <strong>${score}</strong> 颗星星。<br>叶叶开心 +${rewardHappy}，小饼干 +${rewardCoins}。</p>
+        <div>
+          <span class="pill">💗 +${rewardHappy}</span>
+          <span class="pill">🍪 +${rewardCoins}</span>
+        </div>
+        <button id="againBtn" style="margin-top:12px;width:100%;background:#eef8ef;">再玩一局</button>
+        <button id="closeBtn" style="margin-top:10px;width:100%;">回到小窝</button>
+      `;
+      say('刚刚那局很好玩，我还想再来一次。');
+      document.getElementById('againBtn').addEventListener('click', startMiniGame);
+      document.getElementById('closeBtn').addEventListener('click', closeMiniGame);
+    }
+
+    function closeMiniGame(){
+      clearInterval(gameTimer);
+      clearInterval(spawnTimer);
+      clearMiniGameStars();
+      overlay.classList.remove('show');
+      gameUi.classList.remove('show');
+      gameCard.innerHTML = `
+        <h3>星星接接乐</h3>
+        <p>在 15 秒内点掉掉下来的小星星。<br>每点到 1 颗，叶叶会开心一点，还能拿到小饼干。</p>
+        <div>
+          <span class="pill">⭐ 点星星</span>
+          <span class="pill">🍪 赢饼干</span>
+          <span class="pill">💗 加开心</span>
+        </div>
+        <button id="startGameBtn" style="margin-top:12px;width:100%;background:#eef8ef;">开始玩</button>
+      `;
+      document.getElementById('startGameBtn').addEventListener('click', startMiniGame);
+      say(rand(lines.greet));
+    }
+
+    document.getElementById('petBtn').addEventListener('click', actionPet);
+    document.getElementById('feedBtn').addEventListener('click', actionFeed);
+    document.getElementById('playBtn').addEventListener('click', actionPlay);
+    document.getElementById('sleepBtn').addEventListener('click', actionSleep);
+    document.getElementById('dressBtn').addEventListener('click', actionDress);
+    document.getElementById('miniBtn').addEventListener('click', openMiniGame);
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      localStorage.removeItem('leafPetGameSave');
+      state.happy = 72;
+      state.full = 61;
+      state.energy = 66;
+      state.coins = 12;
+      state.pats = 0;
+      state.dress = 0;
+      say('小窝已经重置啦，我们重新开始养叶叶。');
+      render();
+    });
+    pet.addEventListener('click', actionPet);
+    overlay.addEventListener('click', (e)=>{
+      if(e.target === overlay && !gameUi.classList.contains('show')) closeMiniGame();
+    });
+    startGameBtn.addEventListener('click', startMiniGame);
+
+    updateTimeTheme();
+    setInterval(updateTimeTheme, 60000);
+    say(rand(lines.greet));
+    passiveDecay();
+    render();
+    setInterval(saveState, 5000);
+  </script>
+</body>
+</html>
